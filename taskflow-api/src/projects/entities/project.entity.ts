@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { TeamEntity } from '../../teams/entities/team.entity';
+import { TaskEntity } from '../../tasks/entities/task.entity';
 
 export enum ProjectStatus {
   ACTIVE = 'active',
@@ -38,4 +40,7 @@ export class ProjectEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => TaskEntity, (task) => task.project)
+  tasks: TaskEntity[];
 }

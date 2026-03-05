@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
 import { UserRole } from '../interfaces/user.interface';
-import { TeamEntity } from 'src/teams/entities/team.entity';
+import { TeamEntity } from '../../teams/entities/team.entity';
+import { TaskEntity } from '../../tasks/entities/task.entity';
+import { CommentEntity } from '../../comments/entities/comment.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -34,4 +37,10 @@ export class UserEntity {
 
   @ManyToMany(() => TeamEntity, (team) => team.members)
   teams: TeamEntity[];
+
+  @OneToMany(() => TaskEntity, (task) => task.assignee)
+  tasks: TaskEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.author)
+  comments: CommentEntity[];
 }
