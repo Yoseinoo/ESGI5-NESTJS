@@ -4,8 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
 } from 'typeorm';
 import { UserRole } from '../interfaces/user.interface';
+import { TeamEntity } from 'src/teams/entities/team.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -29,4 +31,7 @@ export class UserEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToMany(() => TeamEntity, (team) => team.members)
+  teams: TeamEntity[];
 }
