@@ -1,0 +1,16 @@
+@baseUrl = http://localhost:3000/api
+
+### Lister les utilisateurs
+GET {{baseUrl}}/users
+
+### Lister les équipes
+GET {{baseUrl}}/teams
+
+### Lister les projets
+GET {{baseUrl}}/projects
+
+### Lister les tâches
+GET {{baseUrl}}/tasks
+
+### Lister les commentaires
+GET {{baseUrl}}/comments
