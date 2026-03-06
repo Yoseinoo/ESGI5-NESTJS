@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -54,19 +55,39 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<UserEntity> {
-    const user = await this.findOne(id);
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    currentUser: { id: string; role: string },
+  ): Promise<UserEntity> {
+    // 🔹 Vérifier la permission
+    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas autorisé à modifier ce profil",
+      );
+    }
 
+    // 🔹 Récupérer l'utilisateur à mettre à jour
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Utilisateur ${id} introuvable`);
+    }
+
+    // 🔹 Vérifier si l'email change et est déjà pris
     if (dto.email && dto.email !== user.email) {
-      const existingUser = await this.findByEmail(dto.email);
-      if (existingUser && existingUser.id !== id) {
-        throw new ConflictException(
-          `User with email ${dto.email} already exists`,
-        );
+      const existing = await this.usersRepository.findOne({
+        where: { email: dto.email },
+      });
+      if (existing) {
+        throw new ConflictException(`L'email ${dto.email} est déjà utilisé`);
       }
     }
 
+    // 🔹 Mettre à jour les champs
     Object.assign(user, dto);
+    user.updatedAt = new Date();
+
+    // 🔹 Sauvegarder et retourner
     return this.usersRepository.save(user);
   }
 

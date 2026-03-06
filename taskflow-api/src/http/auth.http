@@ -1,27 +1,38 @@
 @baseUrl = http://localhost:3000/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZlYjQ1OS1mN2Q5LTQ4MDctYmNhMS1mYzBmOWNjMmYwMmUiLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcyODA4MzQ1LCJleHAiOjE3NzI4OTQ3NDV9.GCWOQuItc5c8UpgEgV8qjP2h-u4-fgt-Ht3WZ5mBrfg
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZlYjQ1OS1mN2Q5LTQ4MDctYmNhMS1mYzBmOWNjMmYwMmUiLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcyODA5MjY0LCJleHAiOjE3NzI4OTU2NjR9.bN4H2izU-uN-76lRpCFUL4u2d9DGZz5qAVbb4fmKT3s
+@viewerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTFiYTY1Ny1lYjhhLTQ2M2UtODM1MS01NGM1OTg3NDFhYTEiLCJlbWFpbCI6ImNoYXJsaWVAZXhhbXBsZS5jb20iLCJyb2xlIjoidmlld2VyIiwiaWF0IjoxNzcyODA5Mjc3LCJleHAiOjE3NzI4OTU2Nzd9.Mrunl-QU-JaGE5t4rHWudrp09_Gbqdfm00e2x_NmS4E
+@bobToken = REMPLACER_TOKEN_BOB_MEMBER
 
-### Login ✅
+### Login Alice (admin)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{
-  "email": "alice@example.com",
-  "password": "password123"
-}
+{ "email": "alice@example.com", "password": "password123" }
 
-### Login mauvais mot de passe → 401
+### Login Charlie (viewer)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{
-  "email": "alice@taskflow.dev",
-  "password": "mauvais"
-}
+{ "email": "charlie@example.com", "password": "password123" }
 
-### Me — qui suis-je ?
-GET {{baseUrl}}/auth/me
-Authorization: Bearer {{token}}
+### ADMIN peut supprimer → 204
+DELETE {{baseUrl}}/users/USER_UUID
+Authorization: Bearer {{adminToken}}
 
-### Route protégée sans token → 401
-GET {{baseUrl}}/users
+### VIEWER ne peut pas supprimer → 403
+DELETE {{baseUrl}}/users/USER_UUID
+Authorization: Bearer {{viewerToken}}
+
+### MEMBER peut modifier son propre profil → 200
+PATCH {{baseUrl}}/users/BOB_UUID
+Authorization: Bearer {{bobToken}}
+Content-Type: application/json
+
+{ "name": "Bob Martin-Dupont" }
+
+### MEMBER ne peut PAS modifier le profil d'Alice → 403
+PATCH {{baseUrl}}/users/ALICE_UUID
+Authorization: Bearer {{bobToken}}
+Content-Type: application/json
+
+{ "name": "Alice Hacké" }
