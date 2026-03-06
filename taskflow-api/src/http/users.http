@@ -13,9 +13,11 @@ Content-Type: application/json
 
 ### Lister les utilisateurs (sans passwordHash)
 GET {{baseUrl}}/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZlYjQ1OS1mN2Q5LTQ4MDctYmNhMS1mYzBmOWNjMmYwMmUiLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcyODA5OTU0LCJleHAiOjE3NzI4OTYzNTR9.oJr0L_Klir3kLKLaVO7qEnFwrz-i15OjDUhxAl6Hvos
 
 ### Récupérer par ID (remplacer l'UUID)
 GET {{baseUrl}}/users/f80bc854-fec9-43f1-95a4-cbc610ffdec7
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZlYjQ1OS1mN2Q5LTQ4MDctYmNhMS1mYzBmOWNjMmYwMmUiLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzcyODA5OTU0LCJleHAiOjE3NzI4OTYzNTR9.oJr0L_Klir3kLKLaVO7qEnFwrz-i15OjDUhxAl6Hvos
 
 ### UUID malformé → 400
 GET {{baseUrl}}/users/pas-un-uuid
