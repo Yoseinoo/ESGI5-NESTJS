@@ -56,7 +56,8 @@ export class UsersService {
       passwordHash,
     });
 
-    return this.usersRepository.save(user);
+    const saved = await this.usersRepository.save(user);
+    return this.findOne(saved.id);
   }
 
   async update(

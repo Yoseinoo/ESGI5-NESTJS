@@ -7,6 +7,8 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -75,6 +77,7 @@ export class UsersController {
 
   @Roles(UserRole.ADMIN)
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Supprimer un utilisateur (ADMIN uniquement)' })
   @ApiNoContentResponse({ description: 'Utilisateur supprimé' })
   @ApiNotFoundResponse({ description: 'Utilisateur introuvable' })
