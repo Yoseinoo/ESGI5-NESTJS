@@ -1,0 +1,103 @@
+@baseUrl = http://localhost:3000/api
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZlYjQ1OS1mN2Q5LTQ4MDctYmNhMS1mYzBmOWNjMmYwMmUiLCJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzc3MzY4OTExLCJleHAiOjE3Nzc0NTUzMTF9.yEmCPiHJUZieBt7TPpCiOe571ZekhqrFDxG1p-eplRQ
+@memberToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiMTA4ZTcwNy1iNDBiLTRhNGItOWM1Zi0xYzM5MGU0OGM0MmIiLCJlbWFpbCI6ImJvYkBleGFtcGxlLmNvbSIsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzczNjkxNzYsImV4cCI6MTc3NzQ1NTU3Nn0.C1wfbeG0CjdCe_WUbwktzR1YArTJ17N2Fud6hYw4WOw
+@projectId = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiMTA4ZTcwNy1iNDBiLTRhNGItOWM1Zi0xYzM5MGU0OGM0MmIiLCJlbWFpbCI6ImJvYkBleGFtcGxlLmNvbSIsInJvbGUiOiJtZW1iZXIiLCJpYXQiOjE3NzczNjg5MzQsImV4cCI6MTc3NzQ1NTMzNH0.MTye0kKYc5O3FIQV0-C5WlZoeIIjK945vp9TrUS9Kl0
+@taskId = 44b4ae9f-d026-4f40-b10b-80823d47bd3d
+@bobId = b108e707-b40b-4a4b-9c5f-1c390e48c42b
+
+### Login Alice (admin) — récupérer le token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "alice@example.com", "password": "password123" }
+
+###
+
+### Login Bob (member) — récupérer le token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "bob@example.com", "password": "password123" }
+
+###
+
+### Créer une tâche
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Implémenter l'authentification JWT",
+  "description": "Ajouter LocalStrategy et JwtStrategy via Passport",
+  "status": "todo",
+  "priority": "high",
+  "projectId": "{{projectId}}"
+}
+
+###
+
+### Créer une tâche avec assignee
+POST {{baseUrl}}/tasks
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Revoir la PR de Bob",
+  "priority": "medium",
+  "projectId": "{{projectId}}",
+  "assigneeId": "{{bobId}}"
+}
+
+###
+
+### Lister toutes les tâches
+GET {{baseUrl}}/tasks
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Récupérer une tâche par ID
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Tâche introuvable → 404
+GET {{baseUrl}}/tasks/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Modifier le statut d'une tâche
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "status": "in_progress" }
+
+###
+
+### Assigner Bob à la tâche → déclenche task:assigned via WebSocket
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "assigneeId": "{{bobId}}" }
+
+###
+
+### Modifier priorité + titre
+PATCH {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Implémenter JWT (révisé)",
+  "priority": "low"
+}
+
+###
+
+### Supprimer une tâche → 204
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: Bearer {{adminToken}}
