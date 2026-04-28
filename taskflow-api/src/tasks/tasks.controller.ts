@@ -49,7 +49,7 @@ export class TasksController {
   @ApiNotFoundResponse({ description: 'Tâche introuvable' })
   @ApiUnauthorizedResponse({ description: 'Token manquant ou invalide' })
   findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(+id);
+    return this.tasksService.findOne(id);
   }
 
   @Patch(':id')
@@ -58,7 +58,7 @@ export class TasksController {
   @ApiNotFoundResponse({ description: 'Tâche introuvable' })
   @ApiUnauthorizedResponse({ description: 'Token manquant ou invalide' })
   update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(+id, updateTaskDto);
+    return this.tasksService.update(id, updateTaskDto);
   }
 
   @Delete(':id')
@@ -67,6 +67,6 @@ export class TasksController {
   @ApiNotFoundResponse({ description: 'Tâche introuvable' })
   @ApiUnauthorizedResponse({ description: 'Token manquant ou invalide' })
   remove(@Param('id') id: string) {
-    return this.tasksService.remove(+id);
+    return this.tasksService.remove(id);
   }
 }
