@@ -87,7 +87,8 @@ describe('UsersService', () => {
 
     it('crée et retourne un utilisateur', async () => {
       const newUser = { ...mockUser, email: dto.email, name: dto.name };
-      repo.findOne.mockResolvedValue(null); // pas de doublon email
+      repo.findOne.mockResolvedValueOnce(null); // findByEmail: no duplicate
+      repo.findOne.mockResolvedValueOnce(newUser); // findOne(saved.id): return entity
       repo.create.mockReturnValue(newUser as UserEntity);
       repo.save.mockResolvedValue(newUser as UserEntity);
 
