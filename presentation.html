@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow API — Soutenance</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .slides { width: 100%; height: 100vh; position: relative; }
+
+    .slide {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      padding: 60px 80px;
+      flex-direction: column;
+      justify-content: center;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .slide.active { display: flex; }
+
+    /* ── couleurs par section ── */
+    .slide-title     { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); }
+    .slide-plan      { background: #0f1117; }
+    .slide-archi     { background: #0f1117; }
+    .slide-demo-api  { background: #0f1117; }
+    .slide-demo-auth { background: #0f1117; }
+    .slide-swagger   { background: #0f1117; }
+    .slide-tests     { background: #0f1117; }
+    .slide-retex     { background: #0f1117; }
+    .slide-improve   { background: #0f1117; }
+    .slide-end       { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); }
+
+    /* ── typographie ── */
+    .tag {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+    h2 {
+      font-size: 38px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 32px;
+      border-left: 4px solid #6366f1;
+      padding-left: 20px;
+    }
+    .subtitle {
+      font-size: 22px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+    .github-link {
+      font-size: 14px;
+      color: #6366f1;
+      text-decoration: none;
+      margin-top: 24px;
+      display: inline-block;
+    }
+
+    /* ── grille agenda ── */
+    .agenda {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .agenda-item {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .agenda-item .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #6366f1;
+    }
+    .agenda-item .label {
+      font-size: 15px;
+      color: #cbd5e1;
+      margin-top: 6px;
+    }
+    .agenda-item .duration {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    /* ── colonnes ── */
+    .cols { display: grid; gap: 32px; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* ── cards ── */
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #a78bfa;
+      margin-bottom: 12px;
+    }
+    .card ul { padding-left: 18px; }
+    .card ul li {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    /* ── badge codes HTTP ── */
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .badge {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .badge-green  { background: #14532d; color: #86efac; }
+    .badge-blue   { background: #1e3a5f; color: #93c5fd; }
+    .badge-red    { background: #450a0a; color: #fca5a5; }
+    .badge-orange { background: #431407; color: #fdba74; }
+    .badge-purple { background: #2e1065; color: #c4b5fd; }
+
+    /* ── commandes terminal ── */
+    .cmd-block {
+      background: #0d1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    .cmd-block .prompt { color: #6366f1; }
+    .cmd-block .cmd    { color: #e2e8f0; }
+    .cmd-block .ok     { color: #86efac; }
+    .cmd-block .warn   { color: #fbbf24; }
+
+    /* ── step list ── */
+    .steps { display: flex; flex-direction: column; gap: 14px; }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 10px;
+      padding: 16px 20px;
+    }
+    .step-num {
+      background: #6366f1;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+    .step-text strong { color: #e2e8f0; }
+
+    /* ── schema archi ── */
+    .archi-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .archi-box {
+      background: #1e2130;
+      border: 1px solid #4f46e5;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a78bfa;
+      white-space: nowrap;
+    }
+    .archi-arrow {
+      color: #4f46e5;
+      font-size: 20px;
+      padding: 0 6px;
+    }
+
+    /* ── modules grid ── */
+    .modules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .module-tag {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    .module-tag.highlight { border-color: #6366f1; color: #a78bfa; }
+
+    /* ── navigation ── */
+    .nav {
+      position: fixed;
+      bottom: 28px;
+      right: 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+    }
+    .nav-btn {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      color: #94a3b8;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+    .nav-btn:hover { background: #2d3148; color: #e2e8f0; }
+    .nav-counter { font-size: 13px; color: #475569; }
+
+    /* ── progress bar ── */
+    .progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #6366f1, #a78bfa);
+      transition: width .3s ease;
+      z-index: 100;
+    }
+
+    /* ── slide number indicator ── */
+    .slide-indicator {
+      position: fixed;
+      top: 20px;
+      right: 40px;
+      font-size: 12px;
+      color: #334155;
+      z-index: 100;
+    }
+
+    /* ── retex ── */
+    .retex-item {
+      background: #1e2130;
+      border-left: 3px solid #ef4444;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+    .retex-item .problem { font-size: 14px; font-weight: 600; color: #fca5a5; }
+    .retex-item .fix     { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+    .retex-item .fix span { color: #86efac; }
+
+    /* ── improve ── */
+    .improve-item {
+      background: #1e2130;
+      border-left: 3px solid #6366f1;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+    }
+    .improve-item .title { font-size: 14px; font-weight: 600; color: #a78bfa; }
+    .improve-item .desc  { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+    /* ── end slide ── */
+    .end-content {
+      text-align: center;
+    }
+    .end-content h1 { font-size: 48px; margin-bottom: 12px; }
+    .big-question {
+      font-size: 72px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="slide-indicator" id="indicator"></div>
+
+<div class="slides">
+
+  <!-- ─── SLIDE 1 : TITRE ─── -->
+  <div class="slide slide-title active">
+    <div class="tag">Soutenance — ESGI 5ème année</div>
+    <h1>TaskFlow API</h1>
+    <div class="subtitle">API RESTful de gestion de projets &amp; tâches</div>
+    <div class="subtitle" style="font-size:16px; margin-top:8px;">
+      NestJS &nbsp;·&nbsp; TypeORM &nbsp;·&nbsp; PostgreSQL &nbsp;·&nbsp; Socket.io &nbsp;·&nbsp; Jest
+    </div>
+    <div style="margin-top:40px; font-size:15px; color:#64748b;">Florian Lebon</div>
+    <a class="github-link" href="https://github.com/Yoseinoo/ESGI5-NESTJS">
+      ⬡ github.com/Yoseinoo/ESGI5-NESTJS
+    </a>
+  </div>
+
+  <!-- ─── SLIDE 2 : PLAN ─── -->
+  <div class="slide slide-plan">
+    <h2>Plan de la présentation</h2>
+    <div class="agenda">
+      <div class="agenda-item">
+        <div class="num">01</div>
+        <div class="label">Architecture &amp; structure du projet</div>
+        <div class="duration">~2 min</div>
+      </div>
+      <div class="agenda-item">
+        <div class="num">02</div>
+        <div class="label">Demo — API fonctionnelle</div>
+        <div class="duration">~4 min</div>
+      </div>
+      <div class="agenda-item">
+        <div class="num">03</div>
+        <div class="label">Demo — Authentification JWT</div>
+        <div class="duration">~5 min</div>
+      </div>
+      <div class="agenda-item">
+        <div class="num">04</div>
+        <div class="label">Demo — Swagger UI</div>
+        <div class="duration">~3 min</div>
+      </div>
+      <div class="agenda-item">
+        <div class="num">05</div>
+        <div class="label">Tests automatisés</div>
+        <div class="duration">~3 min</div>
+      </div>
+      <div class="agenda-item">
+        <div class="num">06</div>
+        <div class="label">Retour d'expérience</div>
+        <div class="duration">~3 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 3 : ARCHITECTURE ─── -->
+  <div class="slide slide-archi">
+    <h2>Architecture</h2>
+    <div class="archi-flow" style="margin-bottom:24px;">
+      <div class="archi-box">Client HTTP</div>
+      <div class="archi-arrow">→</div>
+      <div class="archi-box">Controller</div>
+      <div class="archi-arrow">→</div>
+      <div class="archi-box">Guard (JWT · Roles)</div>
+      <div class="archi-arrow">→</div>
+      <div class="archi-box">Service</div>
+      <div class="archi-arrow">→</div>
+      <div class="archi-box">TypeORM</div>
+      <div class="archi-arrow">→</div>
+      <div class="archi-box">PostgreSQL</div>
+    </div>
+    <div class="cols cols-2">
+      <div class="card">
+        <h3>Relations entre entités</h3>
+        <ul>
+          <li><strong>User ↔ Team</strong> — ManyToMany (table <code>team_members</code>)</li>
+          <li><strong>Team → Project</strong> — OneToMany, CASCADE delete</li>
+          <li><strong>Project → Task</strong> — OneToMany, CASCADE delete</li>
+          <li><strong>Task → Comment</strong> — OneToMany, CASCADE delete</li>
+          <li><strong>Task → User (assignee)</strong> — nullable, SET NULL on delete</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Modules</h3>
+        <div class="modules">
+          <span class="module-tag highlight">auth</span>
+          <span class="module-tag highlight">users</span>
+          <span class="module-tag">teams</span>
+          <span class="module-tag">projects</span>
+          <span class="module-tag highlight">tasks</span>
+          <span class="module-tag">comments</span>
+          <span class="module-tag highlight">notifications</span>
+          <span class="module-tag">health</span>
+          <span class="module-tag">common</span>
+        </div>
+        <div style="margin-top:16px; font-size:13px; color:#64748b;">
+          GlobalExceptionFilter · LoggingInterceptor · ValidationPipe · GlobalPrefix <code>/api</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 4 : DEMO API ─── -->
+  <div class="slide slide-demo-api">
+    <h2>Demo 1 — API fonctionnelle</h2>
+    <div class="cols cols-2">
+      <div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Démarrer le serveur<br>
+              <code style="color:#6366f1; font-size:13px;">npm run start:dev</code>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>GET /api/users</strong> — liste des utilisateurs</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>POST /api/users</strong> — créer un utilisateur</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>GET /api/users/:id</strong> — id inexistant → 404</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-text"><strong>POST /api/users</strong> — email doublon → 409</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Codes HTTP visibles</h3>
+          <div class="badges">
+            <span class="badge badge-green">200 OK</span>
+            <span class="badge badge-blue">201 Created</span>
+            <span class="badge badge-red">404 Not Found</span>
+            <span class="badge badge-orange">409 Conflict</span>
+            <span class="badge badge-red">400 Bad Request</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Sécurité — passwordHash</h3>
+          <ul>
+            <li>Champ <code>select: false</code> dans l'entité</li>
+            <li>Jamais exposé dans les réponses API</li>
+            <li>Seul <code>findByEmailWithPassword()</code> le sélectionne</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 5 : DEMO AUTH ─── -->
+  <div class="slide slide-demo-auth">
+    <h2>Demo 2 — Authentification JWT</h2>
+    <div class="cols cols-2">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>POST /api/auth/login</strong><br>
+            <code style="font-size:12px; color:#94a3b8;">{ email, password }</code>
+            <span class="badge badge-green" style="margin-left:8px; font-size:11px;">200 + token</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>GET /api/auth/me</strong> sans token
+            <span class="badge badge-red" style="margin-left:8px; font-size:11px;">401</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>GET /api/auth/me</strong> avec token
+            <span class="badge badge-green" style="margin-left:8px; font-size:11px;">200 + profil</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            Action admin avec token <em>member</em>
+            <span class="badge badge-orange" style="margin-left:8px; font-size:11px;">403</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Stratégie</h3>
+        <ul>
+          <li><strong>LocalStrategy</strong> — valide email + password au login</li>
+          <li><strong>JwtStrategy</strong> — vérifie le Bearer token sur toutes les routes</li>
+          <li><strong>JwtAuthGuard</strong> appliqué globalement</li>
+          <li><strong>@Public()</strong> pour exclure login et <code>/health</code></li>
+          <li><strong>RolesGuard</strong> + <strong>@Roles()</strong> pour le RBAC</li>
+          <li>Vérification de propriété dans <code>UsersService.update()</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 6 : SWAGGER ─── -->
+  <div class="slide slide-swagger">
+    <h2>Demo 3 — Swagger UI</h2>
+    <div class="cols cols-2">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            Ouvrir <strong>http://localhost:3000/docs</strong>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            Cliquer <strong>Authorize</strong> → coller le token JWT
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            Tester <strong>GET /api/users</strong> directement depuis l'UI
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            Montrer les schémas de réponse et les codes HTTP documentés
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Documentation générée</h3>
+        <ul>
+          <li>6 tags : <code>auth</code>, <code>users</code>, <code>teams</code>, <code>projects</code>, <code>tasks</code>, <code>comments</code></li>
+          <li><code>@ApiProperty</code> sur tous les DTOs</li>
+          <li><code>@ApiBearerAuth</code> sur les routes protégées</li>
+          <li>Codes de réponse documentés par endpoint</li>
+          <li>Disponible uniquement hors production</li>
+        </ul>
+        <div class="cmd-block" style="margin-top:12px;">
+          <span class="prompt">$</span> <span class="cmd">npm run start:dev</span><br>
+          <span class="ok">→ http://localhost:3000/docs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 7 : TESTS ─── -->
+  <div class="slide slide-tests">
+    <h2>Tests automatisés</h2>
+    <div class="cols cols-2">
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <h3>Tests unitaires (Jest + mocks)</h3>
+          <ul>
+            <li><strong>UsersService</strong> — 8 tests, mock repository complet</li>
+            <li><strong>RolesGuard</strong> — 4 tests, contexte d'exécution simulé</li>
+            <li>Aucune connexion DB requise</li>
+          </ul>
+          <div class="cmd-block">
+            <span class="prompt">$</span> <span class="cmd">npm run test</span><br>
+            <span class="prompt">$</span> <span class="cmd">npm run test:cov</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Tests e2e (Supertest)</h3>
+          <ul>
+            <li>Base dédiée <code>taskflow_test</code></li>
+            <li><strong>auth.e2e</strong> — 5 tests (login, 401, me…)</li>
+            <li><strong>users.e2e</strong> — 6 tests (CRUD, 403…)</li>
+            <li>Exécution séquentielle <code>--runInBand</code></li>
+          </ul>
+          <div class="cmd-block">
+            <span class="prompt">$</span> <span class="cmd">npm run test:e2e</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Points de vigilance résolus</h3>
+        <ul>
+          <li style="margin-bottom:14px;">
+            <strong style="color:#fca5a5;">Race conditions</strong><br>
+            <span style="font-size:12px; color:#64748b;">Jest parallèle → conflits sur DB partagée → résolu par <code>--runInBand</code></span>
+          </li>
+          <li style="margin-bottom:14px;">
+            <strong style="color:#fca5a5;">Enums PostgreSQL</strong><br>
+            <span style="font-size:12px; color:#64748b;"><code>synchronize(true)</code> ne supprime pas les types enum → <code>TRUNCATE ... CASCADE</code></span>
+          </li>
+          <li>
+            <strong style="color:#fca5a5;">Mock findOne × 2</strong><br>
+            <span style="font-size:12px; color:#64748b;"><code>create()</code> appelle <code>findOne</code> deux fois → <code>mockResolvedValueOnce</code></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 8 : RETEX ─── -->
+  <div class="slide slide-retex">
+    <h2>Difficultés &amp; solutions</h2>
+    <div class="retex-item">
+      <div class="problem">passwordHash exposé dans POST /users</div>
+      <div class="fix">TypeORM <code>select: false</code> ignoré par <code>save()</code> → <span>appel de <code>findOne(saved.id)</code> après le save</span></div>
+    </div>
+    <div class="retex-item">
+      <div class="problem">JWT_EXPIRES_IN : erreur 500 au login</div>
+      <div class="fix">Valeur <code>"1h"</code> convertie via <code>Number()</code> → NaN → <span>stocker en secondes : <code>86400</code></span></div>
+    </div>
+    <div class="retex-item">
+      <div class="problem">Enums PostgreSQL non supprimés entre les tests</div>
+      <div class="fix"><code>synchronize(true)</code> drop les tables mais pas les types → <span><code>TRUNCATE ... CASCADE</code> sans drop de schéma</span></div>
+    </div>
+    <div class="retex-item">
+      <div class="problem">Race conditions entre suites e2e</div>
+      <div class="fix">Jest lance les fichiers en parallèle sur la même DB → <span>flag <code>--runInBand</code> dans le script npm</span></div>
+    </div>
+    <div class="retex-item" style="border-left-color:#6366f1;">
+      <div class="problem" style="color:#a78bfa;">Prisma 7 — ruptures de syntaxe</div>
+      <div class="fix">Enums inline invalides, <code>url</code> supprimé du schéma → <span>migration vers <code>prisma.config.ts</code> + enums multi-lignes</span></div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 9 : AMÉLIORATIONS ─── -->
+  <div class="slide slide-improve">
+    <h2>Ce que j'aurais amélioré</h2>
+    <div class="cols cols-2">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="improve-item">
+          <div class="title">Compléter les services stubs</div>
+          <div class="desc">ProjectsService et CommentsService sont restés à l'état de squelettes CLI — implémentation TypeORM complète manquante</div>
+        </div>
+        <div class="improve-item">
+          <div class="title">Pagination &amp; filtres</div>
+          <div class="desc">GET /tasks retourne tout sans limite — pagination par offset ou curseur + filtres (statut, priorité)</div>
+        </div>
+        <div class="improve-item">
+          <div class="title">Refresh tokens</div>
+          <div class="desc">Token à durée fixe sans renouvellement — ajout d'un refresh token révocable pour les sessions longues</div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div class="improve-item">
+          <div class="title">Migration Prisma complète</div>
+          <div class="desc">La branche <code>feature/prisma</code> pose les bases mais TypeORM reste actif — migration totale pour profiter du typage fort et de <code>omit</code></div>
+        </div>
+        <div class="improve-item">
+          <div class="title">Tests e2e exhaustifs</div>
+          <div class="desc">Seuls auth et users sont couverts — tests pour teams, projects, tasks, comments et le flux WebSocket manquants</div>
+        </div>
+        <div class="improve-item">
+          <div class="title">Rate limiting &amp; sécurité</div>
+          <div class="desc">Pas de protection contre le brute-force au login — <code>@nestjs/throttler</code> + helmet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 10 : FIN ─── -->
+  <div class="slide slide-end">
+    <div class="end-content">
+      <div class="tag">Merci</div>
+      <h1>Questions ?</h1>
+      <div class="big-question">🙋</div>
+      <div class="subtitle" style="margin-top:16px; font-size:16px;">
+        github.com/Yoseinoo/ESGI5-NESTJS
+      </div>
+      <div class="badges" style="justify-content:center; margin-top:24px;">
+        <span class="badge badge-purple">NestJS</span>
+        <span class="badge badge-blue">TypeORM</span>
+        <span class="badge badge-green">PostgreSQL</span>
+        <span class="badge badge-purple">Socket.io</span>
+        <span class="badge badge-orange">Jest</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /slides -->
+
+<!-- ── navigation ── -->
+<div class="nav">
+  <button class="nav-btn" onclick="prev()">←</button>
+  <span class="nav-counter" id="counter"></span>
+  <button class="nav-btn" onclick="next()">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('indicator').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${((current + 1) / slides.length) * 100}%`;
+  }
+
+  function next() { show(current + 1); }
+  function prev() { show(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') next();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') prev();
+  });
+
+  show(0);
+</script>
+</body>
+</html>
