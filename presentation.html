@@ -396,7 +396,7 @@
           <li><strong>Team → Project</strong> — OneToMany, CASCADE delete</li>
           <li><strong>Project → Task</strong> — OneToMany, CASCADE delete</li>
           <li><strong>Task → Comment</strong> — OneToMany, CASCADE delete</li>
-          <li><strong>Task → User (assignee)</strong> — nullable, SET NULL on delete</li>
+          <li><strong>Task → User (assignee)</strong> — ManyToOne, SET NULL on delete</li>
         </ul>
       </div>
       <div class="card">
@@ -409,8 +409,8 @@
           <span class="module-tag highlight">tasks</span>
           <span class="module-tag">comments</span>
           <span class="module-tag highlight">notifications</span>
-          <span class="module-tag">health</span>
-          <span class="module-tag">common</span>
+          <span class="module-tag highlight">health</span>
+          <span class="module-tag highlight">common</span>
         </div>
         <div style="margin-top:16px; font-size:13px; color:#64748b;">
           GlobalExceptionFilter · LoggingInterceptor · ValidationPipe · GlobalPrefix <code>/api</code>
@@ -643,7 +643,49 @@
     </div>
   </div>
 
-  <!-- ─── SLIDE 9 : AMÉLIORATIONS ─── -->
+  <!-- ─── SLIDE 9 : BONUS ─── -->
+  <div class="slide slide-archi">
+    <h2>Bonus — Prisma ORM &amp; WebSockets</h2>
+    <div class="cols cols-2">
+      <div class="card">
+        <h3 style="color:#f472b6;">Prisma ORM <span style="font-size:11px; color:#64748b; font-weight:400;">branche feature/prisma</span></h3>
+        <ul>
+          <li>Migration du schéma TypeORM → <code>prisma/schema.prisma</code></li>
+          <li>Connexion via <code>prisma.config.ts</code> (Prisma 7 — rupture vs v5)</li>
+          <li><strong>PrismaService</strong> étend <code>PrismaClient</code>, gère <code>onModuleInit</code> / <code>onModuleDestroy</code></li>
+          <li><strong>PrismaModule</strong> global — injectable partout sans re-import</li>
+          <li><strong>UsersPrismaService</strong> — réimplémentation avec <code>omit: { passwordHash }</code> natif Prisma 7</li>
+        </ul>
+        <div class="cmd-block" style="margin-top:12px;">
+          <span class="prompt">$</span> <span class="cmd">npx prisma migrate dev --name init-taskflow</span><br>
+          <span class="prompt">$</span> <span class="cmd">npx prisma generate</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="color:#34d399;">Socket.io — Notifications temps réel</h3>
+        <ul>
+          <li><strong>NotificationsGateway</strong> sur le namespace <code>/notifications</code></li>
+          <li>Auth JWT à la connexion via <code>handshake.auth.token</code> — déconnexion immédiate si invalide</li>
+          <li>Chaque client rejoint automatiquement la room <code>user:&lt;id&gt;</code></li>
+          <li>Événement <code>join:project</code> → room <code>project:&lt;id&gt;</code></li>
+          <li>Hook dans <code>TasksService.update()</code> : assigné change → <code>task:assigned</code> émis en temps réel</li>
+        </ul>
+        <div class="cmd-block" style="margin-top:12px;">
+          <span class="ok">→ http://localhost:3000/test-ws.html</span><br>
+          <span style="color:#64748b; font-size:12px;">Page HTML de test livrée avec le projet</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:13px; color:#64748b;">Stack bonus :</span>
+      <span class="badge badge-purple">@nestjs/websockets</span>
+      <span class="badge badge-green">socket.io</span>
+      <span class="badge badge-blue">@prisma/client ^7.8</span>
+      <span class="badge badge-purple">@nestjs/terminus</span>
+    </div>
+  </div>
+
+  <!-- ─── SLIDE 10 : AMÉLIORATIONS ─── -->
   <div class="slide slide-improve">
     <h2>Ce que j'aurais amélioré</h2>
     <div class="cols cols-2">
